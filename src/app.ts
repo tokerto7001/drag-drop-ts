@@ -56,10 +56,49 @@ const validateInputs = (objectToValidate: ObjectToValidate): boolean => {
 };
 
 // CLASSES
+enum ProjectStatus {
+    Active,
+    Finished
+};
+class Project {
+    constructor(public id: string, public title: string, public description: string, public people: number, public status: ProjectStatus) {
+
+    }
+};
+type Listener = (items: Project[]) => void;
+class ProjectState {
+    private listeners: Listener[] = [];
+    private projects: Project[] = [];
+    private static instance: ProjectState;
+
+    addListener(listenerFunction: Listener) {
+        this.listeners.push(listenerFunction);
+    };
+
+    addProject(title: string, description: string, numberOfPeople: number) {
+        const newProject = new Project(Math.random.toString(), title, description, numberOfPeople, ProjectStatus.Active)
+        this.projects.push(newProject);
+        for (const listenerFunc of this.listeners) {
+            listenerFunc(this.projects.slice());
+        }
+    };
+
+    static getInstance() {
+        if (this.instance) {
+            return this.instance;
+        };
+        this.instance = new ProjectState();
+        return this.instance;
+    };
+};
+
+// need only 1 state management object
+const projectState = ProjectState.getInstance();
 class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
+    assignedProjects: Project[];
 
     constructor(private type: 'active' | 'finished') {
         // list template
@@ -67,16 +106,33 @@ class ProjectList {
         // app div
         this.hostElement = document.getElementById('app')! as HTMLDivElement;
 
+        this.assignedProjects = [];
+
         // imported node and element definition
         const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild as HTMLElement;
         // dynamic id according to the type of the project
         this.element.id = `${this.type}-projects`;
+
+        projectState.addListener((projects: Project[]) => {
+            this.assignedProjects = projects;
+            this.renderProjects();
+        })
+
         // insert into DOM
         this.attach();
         this.renderContent();
     };
 
+    // render the projects on every adding
+    private renderProjects() {
+        const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        for (const projectItem of this.assignedProjects) {
+            const listItem = document.createElement('li');
+            listItem.textContent = projectItem.title;
+            listEl.appendChild(listItem);
+        }
+    }
     // render the content according to its type
     private renderContent() {
         const listId = `${this.type}-projects-list`;
@@ -173,7 +229,7 @@ class ProjectInput {
         const userInput = this.collectUserInput();
         if (Array.isArray(userInput)) { // although tuples are not recognized by JS, they are arrays at the end of the day
             const [title, description, people] = userInput;
-            console.log(title, description, people);
+            projectState.addProject(title, description, people);
         };
         this.clearUserInputs();
     };
