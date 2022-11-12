@@ -55,6 +55,41 @@ const validateInputs = (objectToValidate: ObjectToValidate): boolean => {
     return isValid;
 };
 
+// CLASSES
+class ProjectList {
+    templateElement: HTMLTemplateElement;
+    hostElement: HTMLDivElement;
+    element: HTMLElement;
+
+    constructor(private type: 'active' | 'finished') {
+        // list template
+        this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
+        // app div
+        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+
+        // imported node and element definition
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.element = importedNode.firstElementChild as HTMLElement;
+        // dynamic id according to the type of the project
+        this.element.id = `${this.type}-projects`;
+        // insert into DOM
+        this.attach();
+        this.renderContent();
+    };
+
+    // render the content according to its type
+    private renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.element.querySelector('ul')!.id = listId;
+        this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
+    };
+
+    // inserts the project into DOM
+    private attach() {
+        // right before the closing tag of the div with the id of app
+        this.hostElement.insertAdjacentElement('beforeend', this.element);
+    };
+}
 class ProjectInput {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
@@ -157,3 +192,5 @@ class ProjectInput {
 }
 
 const projInput = new ProjectInput();
+const activeProjectList = new ProjectList('active');
+const finishedProjectList = new ProjectList('finished');
