@@ -1,3 +1,23 @@
+// DECORATORS
+// binds the method automatically to the class so there will be no need for manual binding
+const AutoBind = (_: any, _2: string, descriptor: PropertyDescriptor) => { // if you don't use the parameters, just use _ instead or just enable them in the tsconfig file
+    // gets the method
+    const originalMethod = descriptor.value;
+    // creates a new property descriptor to bind the method
+    const manipulatedDescriptor: PropertyDescriptor = {
+        configurable: true,
+        get() {
+            // binds the original method
+            const boundFunction = originalMethod.bind(this);
+            return boundFunction;
+        }
+    };
+    // returns the new manipulated descriptor of the method
+    return manipulatedDescriptor;
+}
+
+
+
 class ProjectInput {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
@@ -31,6 +51,7 @@ class ProjectInput {
     };
 
     // handler of the form submission
+    @AutoBind
     private submitHandler(event: Event) {
         event.preventDefault();
         console.log(this.titleInputElement.value)
