@@ -1,4 +1,3 @@
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -30,10 +29,35 @@ class ProjectInput {
         this.attach();
     }
     ;
+    clearUserInputs() {
+        this.titleInputElement.value = '';
+        this.descriptionInputElement.value = '';
+        this.peopleInputElement.value = '';
+    }
+    collectUserInput() {
+        const insertedTitle = this.titleInputElement.value;
+        const insertedDescription = this.descriptionInputElement.value;
+        const insertedPeople = this.peopleInputElement.value;
+        if (!insertedTitle.trim().length || !insertedDescription.trim().length || !insertedPeople.trim().length) {
+            alert('Invalid input, please try again!');
+            return;
+        }
+        else {
+            return [insertedTitle, insertedDescription, +insertedPeople];
+        }
+    }
+    ;
     submitHandler(event) {
         event.preventDefault();
-        console.log(this.titleInputElement.value);
+        const userInput = this.collectUserInput();
+        if (Array.isArray(userInput)) {
+            const [title, description, people] = userInput;
+            console.log(title, description, people);
+        }
+        ;
+        this.clearUserInputs();
     }
+    ;
     configure() {
         this.element.addEventListener('submit', this.submitHandler.bind(this));
     }

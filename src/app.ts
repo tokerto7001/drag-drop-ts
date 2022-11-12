@@ -16,8 +16,6 @@ const AutoBind = (_: any, _2: string, descriptor: PropertyDescriptor) => { // if
     return manipulatedDescriptor;
 }
 
-
-
 class ProjectInput {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
@@ -50,17 +48,46 @@ class ProjectInput {
         this.attach();
     };
 
+    //  clears the user inputs
+    private clearUserInputs() {
+        this.titleInputElement.value = '';
+        this.descriptionInputElement.value = '';
+        this.peopleInputElement.value = '';
+    }
+
+    // returns tuple type which will return string, string  and number identifying the input results
+    private collectUserInput(): [string, string, number] | void {
+        const insertedTitle = this.titleInputElement.value;
+        const insertedDescription = this.descriptionInputElement.value;
+        const insertedPeople = this.peopleInputElement.value;
+        // input value validation
+        if (!insertedTitle.trim().length || !insertedDescription.trim().length || !insertedPeople.trim().length) {
+            alert('Invalid input, please try again!');
+            return;
+        } else {
+            // returns the input values
+            return [insertedTitle, insertedDescription, +insertedPeople];
+        }
+    };
+
     // handler of the form submission
     @AutoBind
     private submitHandler(event: Event) {
         event.preventDefault();
-        console.log(this.titleInputElement.value)
-    }
+        const userInput = this.collectUserInput();
+        if (Array.isArray(userInput)) { // although tuples are not recognized by JS, they are arrays at the end of the day
+            const [title, description, people] = userInput;
+            console.log(title, description, people);
+        };
+        this.clearUserInputs();
+    };
+
     // add event listeners to the form element
     private configure() {
         // it is crucial to bind the method with the class in order to reach the class object
         this.element.addEventListener('submit', this.submitHandler.bind(this))
     }
+
     // inserts an element inside hostElement
     private attach() {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);
