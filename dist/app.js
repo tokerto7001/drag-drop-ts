@@ -15,6 +15,30 @@ const AutoBind = (_, _2, descriptor) => {
     };
     return manipulatedDescriptor;
 };
+const validateInputs = (objectToValidate) => {
+    let isValid = true;
+    if (objectToValidate.required) {
+        isValid = isValid && objectToValidate.value.toString().trim().length != 0;
+    }
+    ;
+    if (objectToValidate.minLength != null && typeof objectToValidate.value === 'string') {
+        isValid = isValid && objectToValidate.value.length > objectToValidate.minLength;
+    }
+    ;
+    if (objectToValidate.maxLength != null && typeof objectToValidate.value === 'string') {
+        isValid = isValid && objectToValidate.value.length < objectToValidate.maxLength;
+    }
+    ;
+    if (objectToValidate.min != null && typeof objectToValidate.value === 'number') {
+        isValid = isValid && objectToValidate.value > objectToValidate.min;
+    }
+    ;
+    if (objectToValidate.max != null && typeof objectToValidate.value === 'number') {
+        isValid = isValid && objectToValidate.value < objectToValidate.max;
+    }
+    ;
+    return isValid;
+};
 class ProjectInput {
     constructor() {
         this.templateElement = document.getElementById('project-input');
@@ -38,7 +62,24 @@ class ProjectInput {
         const insertedTitle = this.titleInputElement.value;
         const insertedDescription = this.descriptionInputElement.value;
         const insertedPeople = this.peopleInputElement.value;
-        if (!insertedTitle.trim().length || !insertedDescription.trim().length || !insertedPeople.trim().length) {
+        const titleValidateObject = {
+            value: insertedTitle,
+            required: true
+        };
+        const descriptionValidateObject = {
+            value: insertedDescription,
+            required: true,
+            minLength: 5
+        };
+        const peopleValidateObject = {
+            value: insertedPeople,
+            required: true,
+            min: 1,
+            max: 5
+        };
+        if (!validateInputs(titleValidateObject) &&
+            !validateInputs(descriptionValidateObject) &&
+            !validateInputs(peopleValidateObject)) {
             alert('Invalid input, please try again!');
             return;
         }
@@ -59,7 +100,7 @@ class ProjectInput {
     }
     ;
     configure() {
-        this.element.addEventListener('submit', this.submitHandler.bind(this));
+        this.element.addEventListener('submit', this.submitHandler);
     }
     attach() {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);

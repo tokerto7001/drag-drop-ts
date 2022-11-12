@@ -1,3 +1,14 @@
+// TYPES AND INTERFACES
+interface ObjectToValidate {
+    value: string | number;
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+}
+//
+
 // DECORATORS
 // binds the method automatically to the class so there will be no need for manual binding
 const AutoBind = (_: any, _2: string, descriptor: PropertyDescriptor) => { // if you don't use the parameters, just use _ instead or just enable them in the tsconfig file
@@ -14,7 +25,35 @@ const AutoBind = (_: any, _2: string, descriptor: PropertyDescriptor) => { // if
     };
     // returns the new manipulated descriptor of the method
     return manipulatedDescriptor;
-}
+};
+//
+
+// FUNCTIONS
+// validates the inputs
+const validateInputs = (objectToValidate: ObjectToValidate): boolean => {
+    let isValid = true;
+    // required validation
+    if (objectToValidate.required) {
+        isValid = isValid && objectToValidate.value.toString().trim().length != 0;
+    };
+    // minLength validation
+    if (objectToValidate.minLength != null && typeof objectToValidate.value === 'string') {
+        isValid = isValid && objectToValidate.value.length > objectToValidate.minLength;
+    };
+    // maxLength validation
+    if (objectToValidate.maxLength != null && typeof objectToValidate.value === 'string') {
+        isValid = isValid && objectToValidate.value.length < objectToValidate.maxLength;
+    };
+    // min validation
+    if (objectToValidate.min != null && typeof objectToValidate.value === 'number') {
+        isValid = isValid && objectToValidate.value > objectToValidate.min;
+    };
+    // max validation
+    if (objectToValidate.max != null && typeof objectToValidate.value === 'number') {
+        isValid = isValid && objectToValidate.value < objectToValidate.max;
+    };
+    return isValid;
+};
 
 class ProjectInput {
     templateElement: HTMLTemplateElement;
@@ -60,8 +99,30 @@ class ProjectInput {
         const insertedTitle = this.titleInputElement.value;
         const insertedDescription = this.descriptionInputElement.value;
         const insertedPeople = this.peopleInputElement.value;
+
+        // construct objectToValidates
+        const titleValidateObject: ObjectToValidate = {
+            value: insertedTitle,
+            required: true
+        };
+        const descriptionValidateObject: ObjectToValidate = {
+            value: insertedDescription,
+            required: true,
+            minLength: 5
+        };
+        const peopleValidateObject: ObjectToValidate = {
+            value: insertedPeople,
+            required: true,
+            min: 1,
+            max: 5
+        };
+
         // input value validation
-        if (!insertedTitle.trim().length || !insertedDescription.trim().length || !insertedPeople.trim().length) {
+        if (
+            !validateInputs(titleValidateObject) &&
+            !validateInputs(descriptionValidateObject) &&
+            !validateInputs(peopleValidateObject)
+        ) {
             alert('Invalid input, please try again!');
             return;
         } else {
@@ -85,7 +146,8 @@ class ProjectInput {
     // add event listeners to the form element
     private configure() {
         // it is crucial to bind the method with the class in order to reach the class object
-        this.element.addEventListener('submit', this.submitHandler.bind(this))
+        // this.element.addEventListener('submit', this.submitHandler.bind(this))
+        this.element.addEventListener('submit', this.submitHandler); // binding is done via @AutoBind decorator
     }
 
     // inserts an element inside hostElement
