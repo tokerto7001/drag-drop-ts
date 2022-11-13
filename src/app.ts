@@ -6,7 +6,13 @@ interface ObjectToValidate {
     maxLength?: number;
     min?: number;
     max?: number;
-}
+};
+enum ProjectStatus {
+    Active,
+    Finished
+};
+type Listener = (items: Project[]) => void;
+
 //
 
 // DECORATORS
@@ -56,16 +62,12 @@ const validateInputs = (objectToValidate: ObjectToValidate): boolean => {
 };
 
 // CLASSES
-enum ProjectStatus {
-    Active,
-    Finished
-};
+
 class Project {
     constructor(public id: string, public title: string, public description: string, public people: number, public status: ProjectStatus) {
 
     }
 };
-type Listener = (items: Project[]) => void;
 class ProjectState {
     private listeners: Listener[] = [];
     private projects: Project[] = [];
@@ -115,7 +117,13 @@ class ProjectList {
         this.element.id = `${this.type}-projects`;
 
         projectState.addListener((projects: Project[]) => {
-            this.assignedProjects = projects;
+            const relevantProjects = projects.filter((project) => {
+                if (this.type === 'active') {
+                    return project.status === ProjectStatus.Active;
+                }
+                return project.status === ProjectStatus.Finished;
+            })
+            this.assignedProjects = relevantProjects;
             this.renderProjects();
         })
 
@@ -127,6 +135,8 @@ class ProjectList {
     // render the projects on every adding
     private renderProjects() {
         const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        // empties the inner HTML to prevent duplicate values
+        listEl.innerHTML = '';
         for (const projectItem of this.assignedProjects) {
             const listItem = document.createElement('li');
             listItem.textContent = projectItem.title;
