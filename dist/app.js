@@ -5,6 +5,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 ;
+;
+;
 var ProjectStatus;
 (function (ProjectStatus) {
     ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
@@ -125,7 +127,17 @@ class ProjectItem extends Component {
     }
     ;
     ;
-    configure() { }
+    dragStartHandler(event) {
+        console.log(event);
+    }
+    ;
+    dragEndHandler(_) {
+        console.log('Drag End');
+    }
+    configure() {
+        this.element.addEventListener('dragstart', this.dragStartHandler.bind(this));
+        this.element.addEventListener('dragend', this.dragEndHandler);
+    }
     ;
     renderContent() {
         this.element.querySelector('h2').textContent = this.project.title;

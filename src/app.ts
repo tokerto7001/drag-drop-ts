@@ -1,4 +1,14 @@
 // TYPES AND INTERFACES
+interface Draggable {
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+};
+
+interface DragTarget {
+    dragOverHandler(event: DragEvent): void;
+    dropHandler(event: DragEvent): void;
+    dragLeaveHandler(event: DragEvent): void;
+};
 interface ObjectToValidate {
     value: string | number;
     required?: boolean;
@@ -132,7 +142,8 @@ class ProjectState extends State<Project>{
 // need only 1 state management object
 const projectState = ProjectState.getInstance();
 
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement>{
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement>
+    implements Draggable {
     private project: Project;
 
     get persons() {
@@ -150,7 +161,18 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement>{
         this.renderContent();
     };
 
-    configure(): void { };
+    dragStartHandler(event: DragEvent): void {
+        console.log(event);
+    };
+
+    dragEndHandler(_: DragEvent): void {
+        console.log('Drag End')
+    }
+
+    configure() {
+        this.element.addEventListener('dragstart', this.dragStartHandler.bind(this));
+        this.element.addEventListener('dragend', this.dragEndHandler);
+    };
 
     renderContent() {
         this.element.querySelector('h2')!.textContent = this.project.title;
