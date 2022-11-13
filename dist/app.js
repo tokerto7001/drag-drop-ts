@@ -92,11 +92,24 @@ class ProjectState extends State {
     addProject(title, description, numberOfPeople) {
         const newProject = new Project(Math.random().toString(), title, description, numberOfPeople, ProjectStatus.Active);
         this.projects.push(newProject);
+        this.updateListeners();
+    }
+    ;
+    moveProject(projectId, newStatus) {
+        const project = this.projects.find(project => project.id === projectId);
+        if (project && project.status !== newStatus) {
+            project.status = newStatus;
+            this.updateListeners();
+        }
+        ;
+    }
+    ;
+    updateListeners() {
         for (const listenerFunc of this.listeners) {
             listenerFunc(this.projects.slice());
         }
+        ;
     }
-    ;
     static getInstance() {
         if (this.instance) {
             return this.instance;
@@ -165,7 +178,8 @@ class ProjectList extends Component {
     }
     ;
     dropHandler(event) {
-        console.log(event.dataTransfer.getData('text/plain'));
+        const projectId = event.dataTransfer.getData('text/plain');
+        projectState.moveProject(projectId, this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished);
     }
     ;
     dragLeaveHandler(_) {
